@@ -95,14 +95,19 @@ if __name__ == '__main__':
 
 	# 使用序贯模型
 	model = Sequential()
-	model.add(Dense(2, input_dim = 2, activation = 'tanh'))
+	model.add(Dense(8, input_dim = 2, activation = 'tanh'))
+	model.add(Dense(8, input_dim = 2, activation = 'tanh'))
 	model.add(Dense(1))
-	model.compile(optimizer = 'adam', loss = 'mse')
+	model.compile(optimizer = 'sgd', loss = 'mse')
 
 	train_losses = []
+	test_losses = []
 	for step in range(10000):
 		train_loss = model.train_on_batch(samples, labels)
-		losses.append(loss)
-		print('train loss: %s' % loss)
+		test_loss = model.test_on_batch(test_samples, test_labels)
+		train_losses.append(train_loss)
+		test_losses.append(test_loss)
+		print('\ntrain loss: %.4f, test loss: %.4f' % (train_loss, test_loss))
 
-	plt.plot(losses)
+	plt.plot(train_losses)
+	plt.plot(test_losses)
