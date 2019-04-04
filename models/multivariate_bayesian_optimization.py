@@ -14,11 +14,10 @@ import matplotlib.pyplot as plt
 def objective_fn(x):
 	"""
 	目标函数
-	:param x: np.array, 一维或高维向量
+	:param x: np.array, 一维或高维向量, shape = (1, -1)
 	:return: y: float, 目标函数值
 	"""
-	# y = np.linalg.norm(x, 2)
-	y = np.sin(x[0, 0]) + np.cos(x[0, 1]) ** 2
+	y = np.sin(x[0, 0]) + np.cos(x[0, 1]) ** 2 + 0.01 * x[0, 0] ** 2 + 0.01 * x[0, 1] ** 2
 	return y
 
 
@@ -127,6 +126,15 @@ if __name__ == '__main__':
 				break
 		if step != steps - 1:
 			plt.clf()
+
+	# 效果展示
+	x, y = xs, xs
+	mesh_x, mesh_y = np.meshgrid(x, y)
+	value = np.sin(mesh_x) + np.cos(mesh_y) ** 2 + 0.01 * mesh_x ** 2 + 0.01 * mesh_y ** 2
+	plt.figure()
+	plt.contourf(mesh_x, mesh_y, value)
+	plt.colorbar()
+	plt.scatter(x_obs[-1, 0], x_obs[-1, 1], marker = '*', color = 'r', s = 80)
 
 
 
