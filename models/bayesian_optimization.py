@@ -42,7 +42,7 @@ def kernal_fn(series_0, series_1, sigma = 10.0, l = 1.0):
 
 
 def objective_fn(x):
-	return np.sin(x) - np.cos(2 * x) - x ** 2
+	return 5 * np.sin(x) - 3 * np.cos(2 * x) - x ** 2
 
 
 def beyesian_optimization(objective_func, xs, x_obs, show_plot = False):
@@ -73,6 +73,7 @@ def beyesian_optimization(objective_func, xs, x_obs, show_plot = False):
 		plt.plot(xs, upper_bound, 'k--')
 		plt.plot(xs, lower_bound, 'k--')
 		plt.fill_between(xs, upper_bound, lower_bound, facecolor = 'lightgray')
+
 		# 显示真实值
 		plt.plot(xs, y_true, '--', color = '0.5')
 		plt.scatter(x_obs, y_obs)
@@ -92,7 +93,7 @@ def beyesian_optimization(objective_func, xs, x_obs, show_plot = False):
 
 
 if __name__ == '__main__':
-	# 生成多维高斯采样样本
+	# 生成高维高斯采样样本
 	dim = 10
 	samples_len = 5
 	cov_matrix = kernal_fn(np.linspace(0, 1, dim), np.linspace(0, 1, dim))  # 相邻维数之间维度编号距离越近，相关性越强
@@ -100,7 +101,7 @@ if __name__ == '__main__':
 
 	# 进行贝叶斯寻优
 	dim = 80
-	xs = np.linspace(-10, 3, dim)
+	xs = np.linspace(-10, 10, dim)
 	epochs = 20
 	x_obs = np.array([-4])
 
