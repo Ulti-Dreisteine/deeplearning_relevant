@@ -4,7 +4,7 @@ Created on Mon Oct  8 14:32:52 2018
 
 @author: luolei
 
-高斯过程
+一维函数的贝叶斯优化
 """
 import numpy as np
 import matplotlib.pyplot as plt
