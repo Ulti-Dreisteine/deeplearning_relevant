@@ -32,7 +32,7 @@ def sub_objective_fn(x_obs, param_value, param_loc):
 	return y
 
 
-def kernal_fn(series_0, series_1, sigma = 1.0, l = 1.0):
+def kernal_fn(series_0, series_1, sigma = 1.0, l = 1.0):  # TODO: 研究sigma和l参数对模型计算效率的影响
 	"""核函数"""
 	dx = np.expand_dims(series_0, 1) - np.expand_dims(series_1, 0)
 	return (sigma ** 2) * np.exp(-((dx / l) ** 2) / 2)
@@ -47,7 +47,7 @@ def beyesian_optimization(objective_func, xs, x_obs, show_plot = False):
 	:param show_plot: 是否显示寻优结果
 	:return:
 	"""
-	y_obs = objective_func(x_obs)
+	y_obs = objective_func(x_obs) 	# TODO: 这一步需要优化，每步迭代并不需要全部计算
 
 	k = kernal_fn(x_obs, x_obs)
 	k_s = kernal_fn(x_obs, xs)
