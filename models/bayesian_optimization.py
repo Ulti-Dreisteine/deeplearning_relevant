@@ -51,13 +51,13 @@ def objective_func(x):
 	:return: y: float, 目标函数值
 	"""
 	x = np.array(x)
-	y = np.sin(x[0]) + np.cos(x[1]) ** 2 + 0.01 * x[0] ** 2 + 0.01 * x[1] ** 2
+	y = np.sin(x[0]) + np.cos(x[1]) ** 3 + 0.01 * x[0] ** 2 + 0.01 * x[1] ** 2
 	return y
 
 
 def sub_objective_func(objective_func, x, param_value, param_loc):
 	"""
-	固定其他维度值，求取某个子维度上的目标函数
+	固定其他维度值，求取某个子维度上的目标函数，这样可以使用一维贝叶斯优化求解器
 	:param objective_func: function, 需要定义的目标函数
 	:param x_obs: np.array, 观测值向量, shape = (n,)
 	:param param_value: float, 待修改的参数值
@@ -135,18 +135,19 @@ def multivariate_bayesian_optimization(objective_func, x_obs, bounds, resolution
 		raise ValueError('param_dim与x_obs、bounds或resolutions的设置不匹配')
 
 	x_obs = copy.deepcopy(x_obs)
+	x_obs = x_obs.astype(float)
+
 	for step in range(steps):
 		print('\nstep = %s' % step)
 
 		if show_plot & (step > 0):
 			plt.clf()
 
-		new_obs = []
 		for param_loc in range(param_dim):
 			print('processing param_loc %s' % param_loc)
 			xs = np.linspace(bounds[param_loc][0], bounds[param_loc][1], resolutions[param_loc])
 			sub_obj = lambda x: sub_objective_func(objective_func, x_obs[-1, :], x, param_loc)
-			sub_x_obs = np.array([x_obs[-1, param_loc]])  # TODO: 修改 x_obs[:, param_loc] -> np.array([x_obs[-1, param_loc]])
+			sub_x_obs = np.array([copy.deepcopy(x_obs)[-1, param_loc]])  # TODO: 修改 x_obs[:, param_loc] -> np.array([x_obs[-1, param_loc]])
 			print('sub_x_obs = %s' % sub_x_obs)
 
 			if show_plot & (param_loc > 0):
@@ -166,16 +167,15 @@ def multivariate_bayesian_optimization(objective_func, x_obs, bounds, resolution
 					if np.abs(sub_x_obs[-1] - sub_x_obs[-2]) / np.abs(sub_x_obs[-2]) < eps:  # 相对误差控制
 						break
 
-			new_obs.append(sub_x_obs[-1])
-
 			print('endding epoch = %s, param_loc = %s, optimal_value = %.4f, optimal_func_value = %.4f' % (epoch, param_loc, optimal_x, sub_obj(optimal_x)))
+			new_obs = x_obs[-1, :]
+			new_obs[param_loc] = sub_x_obs[-1]
 
-		x_obs = np.vstack((x_obs, np.array(new_obs)))
+			x_obs = np.vstack((x_obs, np.array(new_obs)))
 
 		# 终止step迭代条件
-		if step > 0:
-			if np.linalg.norm(x_obs[-1, :] - x_obs[-2, :]) / np.linalg.norm(x_obs[-2, :]) < eps:  # 相对误差控制
-				break
+		if (x_obs.shape[0] > 1) & (np.linalg.norm(x_obs[-1, :] - x_obs[-2, :]) / np.linalg.norm(x_obs[-2, :]) < eps):  # 相对误差控制
+			break
 
 	return x_obs
 
@@ -216,7 +216,7 @@ if __name__ == '__main__':
 	# 		plt.clf()
 
 	# 进行二维贝叶斯寻优
-	x_obs = np.array([[0.5, 0.5]]).reshape(1, -1)  # attention: 一定要reshape
+	x_obs = np.array([[-3, 2]]).reshape(1, -1)  # attention: 一定要reshape
 	bounds = [[-10, 10], [-10, 10]]
 	resolutions = [100, 100]
 	steps = 100
