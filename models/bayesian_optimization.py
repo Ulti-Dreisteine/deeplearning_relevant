@@ -47,11 +47,16 @@ def multivariate_gaussian_sampling(dim, samples_len, cov_matirx, mius = None, sh
 def objective_func(x):
 	"""
 	目标函数
-	:param x: np.array, 一维或多维自变量
+	:param x: np.array, 一维或多维自变量, 不接受单一数值输入
 	:return: y: float, 目标函数值
 	"""
-	x = np.array(x)
-	y = np.sin(x[0]) ** 2 + np.cos(x[1]) ** 3 + 0.01 * x[0] ** 2 + 0.01 * x[1] ** 2
+	if isinstance(x, list):
+		x = np.array(x)
+	else:
+		x = np.array([x])
+
+	# y = np.sin(x[0]) + np.cos(x[1]) ** 3 + 0.01 * x[0] ** 2 + 0.01 * x[1] ** 2
+	y = (0.15 * x[0]) ** 2 - np.sin(x[0]) + np.cos(3 * x[0]) - np.sin(5 * x[0]) + np.cos(7 * x[0])
 	return y
 
 
@@ -91,24 +96,26 @@ def one_dimensional_bayesian_optimization(obj_func, xs, x_obs, show_plot = False
 	std_var = np.sqrt(np.abs(sigma_s.diagonal()))
 	upper_bound = miu_s + std_var
 	lower_bound = miu_s - std_var
-	# y_true = [obj_func(p) for p in xs]
+	y_true = [obj_func(p) for p in xs]
 
 	if show_plot:
+		plt.title('Bayesian Optimization')
+		# 显示真实值
+		plt.plot(xs, y_true, '-', color = '0.5')
+		plt.scatter(x_obs, y_obs)
+
 		# 显示估计上下界
 		plt.plot(xs, upper_bound, 'k--')
 		plt.plot(xs, lower_bound, 'k--')
 		plt.fill_between(xs, upper_bound, lower_bound, facecolor = 'lightgray')
-
-		# # 显示真实值
-		# plt.plot(xs, y_true, '--', color = '0.5')
-		# plt.scatter(x_obs, y_obs)
+		plt.legend(['true value', 'guessed bounds'])
 
 		# 标记最优点
-		plt.scatter(xs[np.argmax(upper_bound)], np.max(upper_bound), marker = '*', color = 'r', s = 80)
+		plt.scatter(xs[np.argmin(lower_bound)], np.min(lower_bound), marker = '*', color = 'r', s = 80)
 
 		plt.xlim([np.min(xs), np.max(xs)])
-		plt.xlabel('x')
-		plt.ylabel('y')
+		plt.xlabel('params')
+		plt.ylabel('values')
 		plt.grid(True)
 		plt.tight_layout()
 
@@ -196,47 +203,46 @@ if __name__ == '__main__':
 	# plt.grid(True)
 	# plt.tight_layout()
 
-	# # 进行一维贝叶斯寻优
-	# dim = 80
-	# xs = np.linspace(-10, 10, dim)
-	# epochs = 20
-	# x_obs = np.array([-4])
-	#
-	# plt.figure('bayesian optimization', figsize = [8, 6])
-	# for epoch in range(epochs):
-	# 	miu_s, sigma_s, optimal_x = one_dimensional_bayesian_optimization(objective_func, xs, x_obs, show_plot = True)
-	# 	plt.pause(1.0)
-	#
-	# 	x_obs = np.hstack((x_obs, np.array([optimal_x])))
-	#
-	# 	if epoch == 10:
-	# 		break
-	#
-	# 	if epoch != (epochs - 1):
-	# 		plt.clf()
+	# 进行一维贝叶斯寻优
+	dim = 400
+	xs = np.linspace(-60, 60, dim)
+	epochs = 200
+	x_obs = np.array([-4])
 
-	# 进行二维贝叶斯寻优
-	x_obs = np.array([[-9, 2]]).reshape(1, -1)  # attention: 一定要reshape
-	bounds = [[-30, 30], [-30, 30]]
-	resolutions = [100, 100]
-	steps = 100
-	epochs = 100
-	param_dim = 2
-	eps = 1e-6
-	show_plot = False
+	plt.figure('bayesian optimization', figsize = [8, 6])
+	for epoch in range(epochs):
+		miu_s, sigma_s, optimal_x = one_dimensional_bayesian_optimization(objective_func, xs, x_obs, show_plot = True, sigma = 50.0, l = 5)
+		plt.xlim([-60, 60])
+		plt.ylim([-10, 40])
+		plt.pause(0.3)
 
-	x_obs = multivariate_bayesian_optimization(objective_func, x_obs, bounds, resolutions, steps, epochs, param_dim, eps, show_plot = show_plot)
+		x_obs = np.hstack((x_obs, np.array([optimal_x])))
 
-	# 验证二维寻优结果
-	x, y = np.linspace(bounds[0][0], bounds[0][1], 101), np.linspace(bounds[1][0], bounds[1][1], 101)
-	mesh_x, mesh_y = np.meshgrid(x, y)
-	xx = np.stack((mesh_x, mesh_y), axis = 0)
-	z = objective_func(xx)
-	plt.contourf(mesh_x, mesh_y, z, 30)
-	plt.scatter(x_obs[-1, 0], x_obs[-1, 1], marker = '*', color = 'r', s = 80)
-	plt.xlabel('x')
-	plt.ylabel('y')
-	plt.tight_layout()
+		if epoch != (epochs - 1):
+			plt.clf()
+
+	# # 进行二维贝叶斯寻优
+	# x_obs = np.array([[-9, 2]]).reshape(1, -1)  # attention: 一定要reshape
+	# bounds = [[-30, 30], [-30, 30]]
+	# resolutions = [300, 300]
+	# steps = 100
+	# epochs = 100
+	# param_dim = 2
+	# eps = 1e-6
+	# show_plot = False
+	#
+	# x_obs = multivariate_bayesian_optimization(objective_func, x_obs, bounds, resolutions, steps, epochs, param_dim, eps, show_plot = show_plot)
+	#
+	# # 验证二维寻优结果
+	# x, y = np.linspace(bounds[0][0], bounds[0][1], 101), np.linspace(bounds[1][0], bounds[1][1], 101)
+	# mesh_x, mesh_y = np.meshgrid(x, y)
+	# xx = np.stack((mesh_x, mesh_y), axis = 0)
+	# z = objective_func(xx)
+	# plt.contourf(mesh_x, mesh_y, z, 30)
+	# plt.scatter(x_obs[-1, 0], x_obs[-1, 1], marker = '*', color = 'r', s = 80)
+	# plt.xlabel('x')
+	# plt.ylabel('y')
+	# plt.tight_layout()
 
 
 
