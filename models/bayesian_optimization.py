@@ -51,7 +51,7 @@ def objective_func(x):
 	:return: y: float, 目标函数值
 	"""
 	x = np.array(x)
-	y = np.sin(x[0]) + np.cos(x[1]) ** 3 + 0.01 * x[0] ** 2 + 0.01 * x[1] ** 2
+	y = np.sin(x[0]) ** 2 + np.cos(x[1]) ** 3 + 0.01 * x[0] ** 2 + 0.01 * x[1] ** 2
 	return y
 
 
@@ -216,8 +216,8 @@ if __name__ == '__main__':
 	# 		plt.clf()
 
 	# 进行二维贝叶斯寻优
-	x_obs = np.array([[-3, 2]]).reshape(1, -1)  # attention: 一定要reshape
-	bounds = [[-10, 10], [-10, 10]]
+	x_obs = np.array([[-9, 2]]).reshape(1, -1)  # attention: 一定要reshape
+	bounds = [[-30, 30], [-30, 30]]
 	resolutions = [100, 100]
 	steps = 100
 	epochs = 100
@@ -232,7 +232,7 @@ if __name__ == '__main__':
 	mesh_x, mesh_y = np.meshgrid(x, y)
 	xx = np.stack((mesh_x, mesh_y), axis = 0)
 	z = objective_func(xx)
-	plt.contourf(mesh_x, mesh_y, z)
+	plt.contourf(mesh_x, mesh_y, z, 30)
 	plt.scatter(x_obs[-1, 0], x_obs[-1, 1], marker = '*', color = 'r', s = 80)
 	plt.xlabel('x')
 	plt.ylabel('y')
