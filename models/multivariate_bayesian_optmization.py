@@ -116,7 +116,6 @@ def multivariate_bayesian_optimization(x_obs, bounds, resolutions, steps, epochs
 			xs = np.linspace(bounds[param_loc][0], bounds[param_loc][1], resolutions[param_loc])
 			sub_obj = lambda x: sub_objective_func(x_obs[-1, :], x, param_loc)
 			sub_x_obs = x_obs[:, param_loc]
-			print(len(sub_x_obs))
 
 			if show_plot & (param_loc > 0):
 				plt.clf()
@@ -136,6 +135,9 @@ def multivariate_bayesian_optimization(x_obs, bounds, resolutions, steps, epochs
 						break
 
 			new_obs.append(optimal_x)
+
+			print('param_loc = %s, optimal_x = %.4f, optimal_func_value = %.4f' % (param_loc, optimal_x, sub_obj(optimal_x)))
+
 		x_obs = np.vstack((x_obs, np.array(new_obs)))
 
 		# 终止step迭代条件
