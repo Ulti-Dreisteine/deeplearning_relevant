@@ -91,7 +91,7 @@ def one_dimensional_bayesian_optimization(obj_func, xs, x_obs, show_plot = False
 	std_var = np.sqrt(np.abs(sigma_s.diagonal()))
 	upper_bound = miu_s + std_var
 	lower_bound = miu_s - std_var
-	y_true = [obj_func(p) for p in xs]
+	# y_true = [obj_func(p) for p in xs]
 
 	if show_plot:
 		# 显示估计上下界
@@ -100,11 +100,11 @@ def one_dimensional_bayesian_optimization(obj_func, xs, x_obs, show_plot = False
 		plt.fill_between(xs, upper_bound, lower_bound, facecolor = 'lightgray')
 
 		# # 显示真实值
-		plt.plot(xs, y_true, '--', color = '0.5')
-		plt.scatter(x_obs, y_obs)
+		# plt.plot(xs, y_true, '--', color = '0.5')
+		# plt.scatter(x_obs, y_obs)
 
 		# 标记最优点
-		plt.scatter(xs[np.argmin(lower_bound)], np.min(lower_bound), marker = '*', color = 'r', s = 80)
+		plt.scatter(xs[np.argmax(upper_bound)], np.max(upper_bound), marker = '*', color = 'r', s = 80)
 
 		plt.xlim([np.min(xs), np.max(xs)])
 		plt.xlabel('x')
@@ -131,6 +131,9 @@ def multivariate_bayesian_optimization(objective_func, x_obs, bounds, resolution
 	:param show_plot: bool, 显示过程
 	:return: x_obs: np.ndarray, 观测值优化过程记录
 	"""
+	if (param_dim != x_obs.shape[1]) | (param_dim != len(bounds)) | (param_dim != len(resolutions)):
+		raise ValueError('param_dim与x_obs、bounds或resolutions的设置不匹配')
+
 	x_obs = copy.deepcopy(x_obs)
 	for step in range(steps):
 		print('\nstep = %s' % step)
@@ -144,6 +147,7 @@ def multivariate_bayesian_optimization(objective_func, x_obs, bounds, resolution
 			xs = np.linspace(bounds[param_loc][0], bounds[param_loc][1], resolutions[param_loc])
 			sub_obj = lambda x: sub_objective_func(objective_func, x_obs[-1, :], x, param_loc)
 			sub_x_obs = np.array([x_obs[-1, param_loc]])  # TODO: 修改 x_obs[:, param_loc] -> np.array([x_obs[-1, param_loc]])
+			print('sub_x_obs = %s' % sub_x_obs)
 
 			if show_plot & (param_loc > 0):
 				plt.clf()
@@ -159,7 +163,7 @@ def multivariate_bayesian_optimization(objective_func, x_obs, bounds, resolution
 
 				# 终止epoch迭代条件
 				if epoch > 0:
-					if np.abs(sub_x_obs[-1] - sub_x_obs[-2]) / np.abs(sub_x_obs[-2]) < eps:
+					if np.abs(sub_x_obs[-1] - sub_x_obs[-2]) / np.abs(sub_x_obs[-2]) < eps:  # 相对误差控制
 						break
 
 			new_obs.append(sub_x_obs[-1])
@@ -170,7 +174,7 @@ def multivariate_bayesian_optimization(objective_func, x_obs, bounds, resolution
 
 		# 终止step迭代条件
 		if step > 0:
-			if np.linalg.norm(x_obs[-1, :] - x_obs[-2, :]) < eps:
+			if np.linalg.norm(x_obs[-1, :] - x_obs[-2, :]) / np.linalg.norm(x_obs[-2, :]) < eps:  # 相对误差控制
 				break
 
 	return x_obs
