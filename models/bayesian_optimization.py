@@ -28,9 +28,14 @@ def multivariate_gaussian_sampling(dim, samples_len, cov_matirx, mius = None, sh
 		samples.append(np.random.multivariate_normal(mius, cov_matirx))
 
 	if show_plot:
-		plt.figure()
+		plt.figure(figsize = [6, 4])
+		plt.title('Gaussian Process')
 		for i in range(samples_len):
 			plt.plot(samples[i])
+			plt.xlabel('time')
+			plt.ylabel('value')
+			plt.grid(True)
+			plt.tight_layout()
 
 	return samples
 
@@ -94,12 +99,21 @@ def beyesian_optimization(objective_func, xs, x_obs, show_plot = False):
 
 if __name__ == '__main__':
 	# 生成高维高斯采样样本
-	dim = 10
+	dim = 100
 	samples_len = 5
-	cov_matrix = kernal_fn(np.linspace(0, 1, dim), np.linspace(0, 1, dim))  # 相邻维数之间维度编号距离越近，相关性越强
+	cov_matrix = kernal_fn(np.linspace(0, 1, dim), np.linspace(0, 1, dim), sigma = 1, l = 0.1)  # 相邻维数之间维度编号距离越近，相关性越强
 	samples = multivariate_gaussian_sampling(dim, samples_len, cov_matrix, show_plot = False)  # TODO: 为什么这一步可以平滑？
 
-	# 进行贝叶斯寻优
+	# import seaborn as sns
+	# plt.figure(figsize = [5, 4])
+	# plt.title('Covariance Matrix')
+	# sns.heatmap(cov_matrix)
+	# plt.xlabel('variable num')
+	# plt.ylabel('variable num')
+	# plt.grid(True)
+	# plt.tight_layout()
+
+	# # 进行贝叶斯寻优
 	dim = 80
 	xs = np.linspace(-10, 10, dim)
 	epochs = 20
@@ -110,9 +124,18 @@ if __name__ == '__main__':
 		miu_s, sigma_s, optimal_x = beyesian_optimization(objective_fn, xs, x_obs, show_plot = True)
 		plt.pause(1.0)
 
-		if epoch != epochs - 1:
-			plt.clf()
 		x_obs = np.hstack((x_obs, np.array([optimal_x])))
+
+		if epoch == 10:
+			break
+
+		if epoch != (epochs - 1):
+			plt.clf()
+
+
+
+
+
 
 
 
