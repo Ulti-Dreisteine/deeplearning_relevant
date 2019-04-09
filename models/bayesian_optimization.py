@@ -213,8 +213,8 @@ if __name__ == '__main__':
 	for epoch in range(epochs):
 		miu_s, sigma_s, optimal_x = one_dimensional_bayesian_optimization(objective_func, xs, x_obs, show_plot = True, sigma = 50.0, l = 5)
 		plt.xlim([-60, 60])
-		plt.ylim([-10, 40])
-		plt.pause(0.3)
+		plt.ylim([-60, 40])
+		plt.pause(1.0)
 
 		x_obs = np.hstack((x_obs, np.array([optimal_x])))
 
