@@ -53,8 +53,6 @@ if __name__ == '__main__':
 			print('第{}次迭代损失 = {}'.format(step, loss))
 
 	plt.plot(loss_record)
-
-
-
+    
 
 
