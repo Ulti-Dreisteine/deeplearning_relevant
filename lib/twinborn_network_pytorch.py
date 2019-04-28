@@ -31,6 +31,7 @@ def criterion(y_true, y_pred):
 	loss = l1(y_true, y_pred)
 	return loss
 
+
 class NN(nn.Module):
 	def __init__(self, input_size, hidden_size):
 		super(NN, self).__init__()
